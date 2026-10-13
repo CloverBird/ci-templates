@@ -1,0 +1,54 @@
+name: .NET Build And Test
+
+on:
+  workflow_call:
+    inputs:
+      dotnet_version:
+        required: true
+        type: string
+      build_configuration:
+        required: true
+        type: string
+      solution:
+        required: true
+        type: string
+      build_arguments:
+        required: true
+        type: string
+      test_arguments:
+        required: true
+        type: string
+      restore_arguments:
+        required: true
+        type: string
+
+jobs:
+  build-and-test:
+    name: Build-And-Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet_version }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ inputs.solution }} ${{ inputs.restore_arguments }}
+
+      - name: Build application
+        run: dotnet build ${{ inputs.solution }} --configuration ${{ inputs.build_configuration }} ${{ inputs.build_arguments }}
+
+      - name: Run unit tests
+        run: dotnet test ${{ inputs.solution }} --configuration ${{ inputs.build_configuration }} ${{ inputs.test_arguments }}
