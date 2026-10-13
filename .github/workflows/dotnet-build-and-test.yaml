@@ -12,13 +12,14 @@ on:
       solution:
         required: true
         type: string
+      restore_arguments:
+        required: false
+        type: string
+        default: ''
       build_arguments:
         required: true
         type: string
       test_arguments:
-        required: true
-        type: string
-      restore_arguments:
         required: true
         type: string
 
